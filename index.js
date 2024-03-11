@@ -17,6 +17,8 @@ const provider = new ethers.providers.JsonRpcProvider(RPC);
 
 const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
 
+const CHAT_IDS = [1559803968]
+
 // Function to send an alert message
 async function sendAlert(staker, amount, txHash) {
     const userUrl = `${ADDRESS_EXPLORER_URL}${staker}`;
@@ -27,8 +29,9 @@ async function sendAlert(staker, amount, txHash) {
     const opts = {
         parse_mode: 'HTML',
     }
-    await bot.sendMessage(msg.chat.id, message, opts);
-
+    for (const chatId of CHAT_IDS) {
+        await bot.sendMessage(chatId, message, opts);
+    }
 }
 
 /*
