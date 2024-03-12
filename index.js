@@ -17,7 +17,7 @@ const provider = new ethers.providers.JsonRpcProvider(RPC);
 
 const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
 
-const CHANNEL_ID = -1002122793010;
+const GROUP_ID = -1002018827908;
 
 // Function to send an alert message
 async function sendAlert(staker, amount, txHash) {
@@ -29,7 +29,19 @@ async function sendAlert(staker, amount, txHash) {
     const opts = {
         parse_mode: 'HTML',
     }
-    await bot.sendMessage(CHANNEL_ID, message, opts);
+    await bot.sendMessage(GROUP_ID, message, opts);
+}
+
+async function sendUnbondAlert(staker, txHash) {
+    const userUrl = `${ADDRESS_EXPLORER_URL}${staker}`;
+
+    const message =
+        `<b>👨‍🦳 Address <a href="${userUrl}">${staker}</a> started unbonding</b>\n\n` +
+        `<b>🔗 TXID 👉 <a href="${TX_EXPLORER_URL}${txHash}">check here</a>\n\n</b>`;
+    const opts = {
+        parse_mode: 'HTML',
+    }
+    await bot.sendMessage(GROUP_ID, message, opts);
 }
 
 /*
@@ -46,3 +58,12 @@ contract.on('Unstaked', async (staker, amount, newStake, newTotalPrincipal, even
 
     await sendAlert(staker, logAmount, event.transactionHash);
 });
+
+/*
+Monitor Unbond events
+event UnbondingPeriodStarted(address indexed staker)
+*/
+
+contract.on('UnbondingPeriodStarted', async (staker, event) => {
+    await sendUnbondAlert(staker, event.transactionHash);
+})
